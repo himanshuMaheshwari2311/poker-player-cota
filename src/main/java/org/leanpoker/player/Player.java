@@ -14,6 +14,9 @@ public class Player {
     static final List<String> HIGHEST_CARDS = List.of("A", "K", "Q");
     static final List<String> HIGH_CARDS = List.of("A", "K", "Q", "J", "10");
 
+    boolean flush = false;
+    boolean straight = false;
+
     // CONSECUTIVE ROUNDS
 
     static public final int HIGH = 50;
@@ -168,7 +171,7 @@ public class Player {
         if (PAIR_RANK) {
             if (currentBet(gameState) < 100)
                 return call(gameState);
-            return raise(gameState, 20);
+            return fold();
         }
         if (TWO_HIGH) {
             if (currentBet(gameState) > 100) {
@@ -252,7 +255,7 @@ public class Player {
         }
         var suit = set.stream().findAny().get().suit();
         var isSameColor = set.stream().allMatch(card -> card.suit().equals(suit));
-
+//        isFlush = true
         return isSameColor && set.size() == 5;
     }
 
