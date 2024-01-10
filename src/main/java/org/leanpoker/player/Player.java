@@ -18,6 +18,26 @@ public class Player {
     static boolean PAIR_RANK = false;
     static boolean PAIR_COLOR = false;
 
+    static public final int HIGH = 50;
+
+    static public final int PAIR = 75;
+
+    static public final int DOUBLE_PAIR = 100;
+
+    static public final int THREE_OF_A_KIND = 200;
+
+    static public final int STRAIGHT = 300;
+
+    static public final int FLUSH = 400;
+
+    static public final int FULL_HOUSE = 500;
+
+    static public final int FOUR_OF_A_KIND = 600;
+
+    static public final int STRAIGHT_FLUSH = 800;
+
+    static public final int ROYAL_FLUSH = 1000;
+
     public static int betRequest(JsonNode request) throws JsonProcessingException {
         var gameState = mapper.treeToValue(request, Request.class);
 //        var cards = Arrays.stream(gameState.players()).filter(player -> player.name().equals("Cota")).findFirst().get().hole_cards();
@@ -37,7 +57,11 @@ public class Player {
             PAIR_COLOR = true;
         }
         if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
-            return call(gameState);
+            if (gameState.current_buy_in() < 100) {
+                return call(gameState);
+            } else {
+                return fold();
+            }
         } else {
             return fold();
         }
@@ -56,11 +80,31 @@ public class Player {
 //    private static int minimumRaise(Request request) {
 //        var cards = Arrays.stream(request.players()).filter(player -> player.name().equals("Cota")).findFirst().get().hole_cards();
 //        var communityCards = request.community_cards();
-//
-//        if (singlePair() || twoPair()) {
-            
+//        var currentBuyIn = request.current_buy_in();
+//        if (singlePair(cards)) {
+//            return Math.max(0, (PAIR - currentBuyIn));
 //        }
+//        if (doublePair()) {
+//            return Math.max(0, (DOUBLE_PAIR - currentBuyIn));
+//        }
+//        if (singlePair()) {
+//            return Math.max(0, (HIGH - currentBuyIn));
+//        }
+//        if (singlePair()) {
+//            return Math.max(0, (HIGH - currentBuyIn));
+//        }
+//        if (singlePair()) {
+//            return Math.max(0, (HIGH - currentBuyIn));
+//        }
+//        if (singlePair()) {
+//            return Math.max(0, (HIGH - currentBuyIn));
+//        }
+//
 //        return 0;
+//    }
+
+//    private boolean singlePair(Card[] card) {
+//
 //    }
 
     public static void showdown(JsonNode game) {
