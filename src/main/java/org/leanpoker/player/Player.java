@@ -77,11 +77,9 @@ public class Player {
 //        }
     }
 
-//    private static int raise(Request request, int raiseBy) {
-//        var raise = 0;
-//        request.current_buy_in()
-//        return raise;
-//    }
+    //private static int raise(Request request, int raiseBy) {
+      //  return Math.max(request.players()[request.in_action()].stack(), call() + raiseBy);
+    //}
 
     private static int fold() {
         return 0;
@@ -90,7 +88,7 @@ public class Player {
     private static int call(Request request) {
         var player = request.players()[request.in_action()];
         var bet = player.bet();
-        var call = Math.max(request.players()[request.in_action()].stack(), request.current_buy_in() - bet);
+        var call = Math.min(request.players()[request.in_action()].stack(), request.current_buy_in() - bet);
         System.out.println("************Call for " + call + "**************");
         return call;
     }
@@ -185,7 +183,9 @@ public class Player {
     }
 
 //    static int countStraight(List<Card> cards) {
-//        cards.sort(CardRankComparator::compare);
+//        cards.sort((card1, card2) -> {
+//            compare(card1.rank(), card2.rank());
+//        });
 //
 //        // Iterate through the sorted list and check if each card is one rank higher than the previous card
 //        for (int i = 1; i < cards.size(); i++) {
@@ -207,26 +207,22 @@ public class Player {
 
     public static void showdown(JsonNode game) {
     }
+//    public static int compare(String rank1, String rank2) {
+//        return rankToInt(rank1) - rankToInt(rank2);
+//    }
 
-
-    static class CardRankComparator implements Comparator<String> {
-        @Override
-        public int compare(String rank1, String rank2) {
-            return rankToInt(rank1) - rankToInt(rank2);
-        }
-
-        private int rankToInt(String rank) {
-            switch (rank) {
-                case "J":
-                    return 11;
-                case "Q":
-                    return 12;
-                case "K":
-                    return 13;
-                default:
-                    return Integer.parseInt(rank);
-            }
+    private int rankToInt(String rank) {
+        switch (rank) {
+            case "J":
+                return 11;
+            case "Q":
+                return 12;
+            case "K":
+                return 13;
+            default:
+                return Integer.parseInt(rank);
         }
     }
+
 }
 
