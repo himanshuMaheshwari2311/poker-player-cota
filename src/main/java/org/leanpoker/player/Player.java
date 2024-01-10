@@ -52,7 +52,11 @@ public class Player {
         }
         if (gameState.community_cards().length == 0) {
             return firstRound(gameState);
-        } else  {
+        } else if(gameState.community_cards().length == 3)  {
+            return checkMyCards(gameState);
+        } else if (gameState.community_cards().length == 4) {
+            return checkMyCards(gameState);
+        } else {
             return checkMyCards(gameState);
         }
     }
@@ -62,8 +66,11 @@ public class Player {
         var communityCards = Arrays.asList(request.community_cards());
         var twoOfAKind = countNOfAKind(allCards, 2);
         var threeOfKindInCommunity = countNOfAKind(communityCards, 3);
+        var twoOfKindInCommunity = countNOfAKind(communityCards, 2);
         var threeOfAkind = countNOfAKind(allCards, 3);
         var fourOfAkind = countNOfAKind(allCards, 4);
+        var haveHighCard = HIGHEST_CARDS.contains(request.players()[request.in_action()].hole_cards()[0].rank())
+                || HIGHEST_CARDS.contains(request.players()[request.in_action()].hole_cards()[1].rank());
         if (isStraightFlush(allCards)) {
             return raise(request, STRAIGHT_FLUSH);
         } else if (isStraight(allCards)) {
@@ -83,13 +90,16 @@ public class Player {
             return raise(request, THREE_OF_A_KIND);
         } else if (isFlush(allCards)) {
             return raise(request, FLUSH);
-        } else if (twoOfAKind == 2) {
+        } else if (twoOfKindInCommunity == 2) {
+            if (haveHighCard && currentBet(request) < 10)
+                return call(request);
+            else
+                return fold();
+        } else if (twoOfAKind == 2 && currentBet(request) < 10 ) {
             return raise(request, DOUBLE_PAIR);
         }  else if (twoOfAKind == 1 && currentBet(request) < 20) {
             return call(request);
-        } else if ((HIGHEST_CARDS.contains(request.players()[request.in_action()].hole_cards()[0].rank())
-                || HIGHEST_CARDS.contains(request.players()[request.in_action()].hole_cards()[1].rank()))
-                && currentBet(request) < 10) {
+        } else if (haveHighCard && currentBet(request) < 10) {
             return call(request);
         }
         return fold();
@@ -234,30 +244,38 @@ public class Player {
                 compare(card1.rank(), card2.rank()));
 
         var straightSet = new HashSet<Card>();
-        int maxConsecutive = 1;
         for (int i = 1; i < cards.size(); i++) {
             if (compare(cards.get(i).rank(), cards.get(i - 1).rank()) == 1) {
                 straightSet.add(cards.get(i - 1));
                 straightSet.add(cards.get(i));
-                maxConsecutive = Math.max(maxConsecutive, straightSet.size());
             } else {
-                maxConsecutive = Math.max(maxConsecutive, straightSet.size());
                 straightSet.clear();
             }
         }
-//        if(straightSet.size() == 4
-//                && cards.get(cards.size() - 1).rank().equals("A")
-//                && cards.get(0).rank().equals("2")
-//        ) {
-//            straightSet.add(cards.get(cards.size() - 1));
-//        }
 
         return straightSet;
     }
 
+    private static int getMaxConsecutive(List<Card> cards) {
+        cards.sort((card1, card2) ->
+                compare(card1.rank(), card2.rank()));
+
+        int maxConsecutive = 1;
+        int consecutives = 1;
+        for (int i = 1; i < cards.size(); i++) {
+            if (compare(cards.get(i).rank(), cards.get(i - 1).rank()) == 1) {
+                consecutives++;
+            } else {
+                maxConsecutive = Math.max(maxConsecutive, consecutives);
+                consecutives = 0;
+            }
+        }
+        return maxConsecutive;
+    }
+
     public static void main(String[] args) {
         System.out.println(
-                isStraight(Arrays.asList(
+                getMaxConsecutive(Arrays.asList(
                         new Card("A", "hearts"),
                         new Card("2", "hearts"),
                         new Card("3", "hearts"),
