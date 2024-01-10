@@ -65,33 +65,39 @@ public class Player {
         var fourOfAkind = countNOfAKind(allCards, 4);
         if (fourOfAkind == 1) {
             return request.players()[request.in_action()].stack();
-        } else {
+//        } else {
+//            return firstRound(request);
+//        }
+        } else if (threeOfAkind == 1) {
+            return raise(request, THREE_OF_A_KIND);
+        } else if (twoOfAKind == 2) {
+            return raise(request, DOUBLE_PAIR);
+        } else {//if (twoOfAKind == 1) {
             return firstRound(request);
         }
-//        } else if (threeOfAkind == 1) {
-//            return Math.max()
-//        } else if (twoOfAKind == 2) {
-//
-//        } else if (twoOfAKind == 1) {
-//
-//        }
     }
 
-    //private static int raise(Request request, int raiseBy) {
-      //  return Math.max(request.players()[request.in_action()].stack(), call() + raiseBy);
-    //}
+    private static int raise(Request request, int raiseBy) {
+        var currentBet = currentBet(request);
+        var raise = currentBet + raiseBy;
+        return Math.max(request.players()[request.in_action()].stack(), raise);
+    }
 
     private static int fold() {
         return 0;
     }
 
     private static int call(Request request) {
-        var player = request.players()[request.in_action()];
-        var bet = player.bet();
-        var call = Math.min(request.players()[request.in_action()].stack(), request.current_buy_in() - bet);
+        var call = Math.min(request.players()[request.in_action()].stack(), currentBet(request));
         System.out.println("************Call for " + call + "**************");
         return call;
     }
+
+private static int currentBet(Request request) {
+    var player = request.players()[request.in_action()];
+    var bet = player.bet();
+    return request.current_buy_in() - bet;
+}
 
     private static int firstRound(Request gameState) {
         boolean TWO_HIGH = false;
@@ -182,22 +188,6 @@ public class Player {
         return pairsCount;
     }
 
-//    static int countStraight(List<Card> cards) {
-//        cards.sort((card1, card2) -> {
-//            compare(card1.rank(), card2.rank());
-//        });
-//
-//        // Iterate through the sorted list and check if each card is one rank higher than the previous card
-//        for (int i = 1; i < cards.size(); i++) {
-//            if (cards.get(i).rank().compareTo(cards.get(i - 1).rank()) != 1) {
-//                return false;
-//            }
-//        }
-//
-//        return true;
-//        return 0;
-//    }
-
     private static List<Card> getAllCards(Card[] myCards, Card[] communityCards) {
         List<Card> allCards = new ArrayList<>();
         allCards.addAll(Arrays.asList(myCards));
@@ -207,11 +197,11 @@ public class Player {
 
     public static void showdown(JsonNode game) {
     }
-//    public static int compare(String rank1, String rank2) {
-//        return rankToInt(rank1) - rankToInt(rank2);
-//    }
+    public static int compare(String rank1, String rank2) {
+        return rankToInt(rank1) - rankToInt(rank2);
+    }
 
-    private int rankToInt(String rank) {
+    private static int rankToInt(String rank) {
         switch (rank) {
             case "J":
                 return 11;
@@ -223,6 +213,20 @@ public class Player {
                 return Integer.parseInt(rank);
         }
     }
+
+//    private static boolean isStraight(List<Card> cards) {
+//        cards.sort((card1, card2) ->
+//            compare(card1.rank(), card2.rank()));
+//
+//        for(int i = 1; i < cards.size(); i++) {
+//
+//            if(rankToInt())
+//            if (rankToInt(cards.get(i).rank()) - rankToInt(cards.get(i - 1).rank()) != 1) {
+//                return false;
+//            }
+//        }
+//        return false;
+//    }
 
 }
 
