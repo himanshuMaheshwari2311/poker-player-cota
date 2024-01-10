@@ -56,9 +56,14 @@ public class Player {
             // color pair
             PAIR_COLOR = true;
         }
-        if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
-            if (gameState.current_buy_in() < 100) {
-                return call(gameState);
+        if(gameState.round() == 0) {
+
+            if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
+                if (gameState.current_buy_in() < 100) {
+                    return call(gameState);
+                } else {
+                    return fold();
+                }
             } else {
                 return fold();
             }
@@ -78,33 +83,44 @@ public class Player {
     }
 
 //    private static int minimumRaise(Request request) {
-//        var cards = Arrays.stream(request.players()).filter(player -> player.name().equals("Cota")).findFirst().get().hole_cards();
+//        var cards = request.players()[request.in_action()].hole_cards();
 //        var communityCards = request.community_cards();
 //        var currentBuyIn = request.current_buy_in();
-//        if (singlePair(cards)) {
+//        var allCards = Arrays.asList(cards, communityCards);
+//        if (singlePair(allCards)) {
 //            return Math.max(0, (PAIR - currentBuyIn));
 //        }
-//        if (doublePair()) {
+//        if (doublePair(allCards)) {
 //            return Math.max(0, (DOUBLE_PAIR - currentBuyIn));
 //        }
-//        if (singlePair()) {
-//            return Math.max(0, (HIGH - currentBuyIn));
+//        if (threeOfAKind(allCards)) {
+//            return Math.max(0, (THREE_OF_A_KIND - currentBuyIn));
 //        }
-//        if (singlePair()) {
-//            return Math.max(0, (HIGH - currentBuyIn));
+//        if (singlePair(allCards)) {
+//            return Math.max(0, (FULL_HOUSE - currentBuyIn));
 //        }
-//        if (singlePair()) {
-//            return Math.max(0, (HIGH - currentBuyIn));
-//        }
-//        if (singlePair()) {
-//            return Math.max(0, (HIGH - currentBuyIn));
-//        }
+////        if (singlePair()) {
+////            return Math.max(0, (HIGH - currentBuyIn));
+////        }
+////        if (singlePair()) {
+////            return Math.max(0, (HIGH - currentBuyIn));
+////        }
 //
 //        return 0;
 //    }
-
-//    private boolean singlePair(Card[] card) {
 //
+//    private threeOfAKind
+//
+//    private boolean sameRank(Card[] card, Card[] communityCard) {
+//        if (card[0].rank().equals(card[1].rank())) {
+//            // pair
+//            PAIR_RANK = true;
+//        } else if (List.of(card[0], card[1]).contains(communityCard[0].rank())) {
+//            // color pair
+//            PAIR_COLOR = true;
+//        } else {
+//
+//        }
 //    }
 
     public static void showdown(JsonNode game) {
