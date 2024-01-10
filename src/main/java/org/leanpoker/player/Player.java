@@ -60,7 +60,9 @@ public class Player {
 
     private static int checkMyCards(Request request) {
         var allCards = getAllCards(request.players()[request.in_action()].hole_cards(), request.community_cards());
+        var communityCards = Arrays.asList(request.community_cards());
         var twoOfAKind = countNOfAKind(allCards, 2);
+        var threeOfKindInCommunity = countNOfAKind(communityCards, 3);
         var threeOfAkind = countNOfAKind(allCards, 3);
         var fourOfAkind = countNOfAKind(allCards, 4);
         if (fourOfAkind == 1) {
@@ -68,13 +70,18 @@ public class Player {
 //        } else {
 //            return firstRound(request);
 //        }
-        } else if (threeOfAkind == 1) {
+        } else if (threeOfAkind == 1 && twoOfAKind == 1) {
+            return raise(request, FULL_HOUSE);
+        } else if (threeOfKindInCommunity == 1) {
+            if (Objects.equals(request.players()[request.in_action()].hole_cards()[0].rank(), "A") || Objects.equals(request.players()[request.in_action()].hole_cards()[1].rank(), "A")) {
+                return call(request);
+            }
+        } else if (threeOfAkind == 1 && threeOfKindInCommunity == 0) {
             return raise(request, THREE_OF_A_KIND);
         } else if (twoOfAKind == 2) {
             return raise(request, DOUBLE_PAIR);
-        } else {//if (twoOfAKind == 1) {
-            return firstRound(request);
         }
+        return fold();
     }
 
     private static int raise(Request request, int raiseBy) {
@@ -209,24 +216,36 @@ private static int currentBet(Request request) {
                 return 12;
             case "K":
                 return 13;
+            case "A":
+                return 14;
             default:
                 return Integer.parseInt(rank);
         }
     }
 
-//    private static boolean isStraight(List<Card> cards) {
-//        cards.sort((card1, card2) ->
-//            compare(card1.rank(), card2.rank()));
-//
-//        for(int i = 1; i < cards.size(); i++) {
-//
-//            if(rankToInt())
-//            if (rankToInt(cards.get(i).rank()) - rankToInt(cards.get(i - 1).rank()) != 1) {
-//                return false;
-//            }
-//        }
-//        return false;
-//    }
+    private static boolean isStraight(List<Card> cards) {
+        cards.sort((card1, card2) ->
+            compare(card1.rank(), card2.rank()));
 
+        int consecutives = 1;
+        for(int i = 1; i < cards.size(); i++) {
+            if (compare(cards.get(i).rank(), cards.get(i - 1).rank()) == 1) {
+                consecutives++;
+            } else {
+                consecutives = 0;
+            }
+        }
+        return consecutives == 5;
+    }
+
+    public static void main(String[] args) {
+        System.out.println(
+                isStraight(Arrays.asList(
+                        new Card("A", "hearts"),
+                        new Card("K", "hearts"),
+                        new Card("Q", "hearts"),
+                        new Card("J", "hearts"),
+                        new Card("10", "hearts")
+                )));
+    }
 }
-
