@@ -46,25 +46,31 @@ public class Player {
         if (gameState.current_buy_in() == 1000 && gameState.round() == 0) {
             return fold();
         }
-//        if (gameState.round() == 0) {
+        if (gameState.round() == 0) {
             return firstRound(gameState);
-//        } else if (gameState.round() == 1){
-//            var communityCards = gameState.community_cards();
-//            return checkMyCards(cards, communityCards);
-//        } else {
-//            return firstRound(gameState);
+        } else if (gameState.round() == 1){
+            var communityCards = gameState.community_cards();
+            return checkMyCards(gameState);
+        } else {
+            return firstRound(gameState);
 //        }
-        //} else {
-        //  return fold();
-        //}
+//        } else {
+//          return fold();
+        }
     }
 
-//    private static int checkMyCards(Card[] myCards, Card[] communityCards) {
-//        var allCards = getAllCards(myCards, communityCards);
-//        var twoOfAKind = countNOfAKind(allCards, 2);
-//        var threeOfAkind = countNOfAKind(allCards, 3);
-//        var fourOfAkind = countNOfAKind(allCards, 4);
-//    }
+    private static int checkMyCards(Request request) {
+        var allCards = getAllCards(request.players()[request.in_action()].hole_cards(), request.community_cards());
+        var twoOfAKind = countNOfAKind(allCards, 2);
+        var threeOfAkind = countNOfAKind(allCards, 3);
+        var fourOfAkind = countNOfAKind(allCards, 4);
+        if (fourOfAkind ==1) {
+            return request.players()[request.in_action()].stack();
+        } else {
+            return firstRound(request);
+        }
+//        } else if (threeOfAkind)
+    }
 
     private static int fold() {
         return 0;
@@ -98,7 +104,7 @@ public class Player {
     private static int call(Request request) {
         var player = request.players()[request.in_action()];
         var bet = player.bet();
-        var call = request.current_buy_in() - bet;
+        var call = Math.max(request.players()[request.in_action()].stack(), request.current_buy_in() - bet);
         System.out.println("************Call for " + call + "**************");
         return request.current_buy_in() - bet;
     }
