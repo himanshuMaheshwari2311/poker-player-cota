@@ -12,10 +12,6 @@ public class Player {
 
     static final String VERSION = "Default Java folding player";
     static final List<String> HIGH_CARDS = List.of("A", "K", "Q", "J", "10");
-    static boolean TWO_HIGH = false;
-    static boolean ONE_HIGH = false;
-    static boolean PAIR_RANK = false;
-    static boolean PAIR_COLOR = false;
 
     static public final int HIGH = 50;
 
@@ -47,21 +43,6 @@ public class Player {
             return fold();
         }
         var cards = gameState.players()[gameState.in_action()].hole_cards();
-
-
-        if (HIGH_CARDS.contains(cards[0].rank()) && HIGH_CARDS.contains(cards[1].rank())) {
-            TWO_HIGH = true;
-        } else if (HIGH_CARDS.contains(cards[0].rank()) || HIGH_CARDS.contains(cards[1].rank())) {
-            ONE_HIGH = true;
-        }
-        if (cards[0].rank().equals(cards[1].rank())) {
-            // pair
-            PAIR_RANK = true;
-        } else if (cards[0].suit().equals(cards[1].suit())) {
-            // color pair
-            PAIR_COLOR = true;
-        }
-
         if (gameState.current_buy_in() == 1000 && gameState.round() == 0) {
             return fold();
         }
@@ -79,8 +60,10 @@ public class Player {
     }
 
 //    private static int checkMyCards(Card[] myCards, Card[] communityCards) {
-//        var allCards = Arrays.asList(myCards, communityCards).stream().toList();
-//        var twoOfAKind = countTwoOfAKind(List.of(myCards, communityCards), 2);
+//        var allCards = getAllCards(myCards, communityCards);
+//        var twoOfAKind = countNOfAKind(allCards, 2);
+//        var threeOfAkind = countNOfAKind(allCards, 3);
+//        var fourOfAkind = countNOfAKind(allCards, 4);
 //    }
 
     private static int fold() {
@@ -88,6 +71,23 @@ public class Player {
     }
     
     private static int firstRound(Request gameState) {
+        boolean TWO_HIGH = false;
+        boolean ONE_HIGH = false;
+        boolean PAIR_RANK = false;
+        boolean PAIR_COLOR = false;
+        var cards = gameState.players()[gameState.in_action()].hole_cards();
+        if (HIGH_CARDS.contains(cards[0].rank()) && HIGH_CARDS.contains(cards[1].rank())) {
+            TWO_HIGH = true;
+        } else if (HIGH_CARDS.contains(cards[0].rank()) || HIGH_CARDS.contains(cards[1].rank())) {
+            ONE_HIGH = true;
+        }
+        if (cards[0].rank().equals(cards[1].rank())) {
+            // pair
+            PAIR_RANK = true;
+        } else if (cards[0].suit().equals(cards[1].suit())) {
+            // color pair
+            PAIR_COLOR = true;
+        }
         if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
             return call(gameState);
         } else {
@@ -153,7 +153,7 @@ public class Player {
 //        }
 //    }
 
-    static int countTwoOfAKind(List<Card> cards, int count) {
+    static int countNOfAKind(List<Card> cards, int count) {
         var rankFrequency = new HashMap<String, Integer>();
         for (var card : cards) {
             rankFrequency.put(card.rank(), rankFrequency.getOrDefault(card.rank(), 0) + 1);
@@ -179,6 +179,13 @@ public class Player {
 //
 //        return true;
         return 0;
+    }
+
+    private static List<Card> getAllCards(Card[] myCards, Card[] communityCards) {
+        List<Card> allCards = new ArrayList<>();
+        allCards.addAll(Arrays.asList(myCards));
+        allCards.addAll(Arrays.asList(communityCards));
+        return allCards;
     }
 
     public static void showdown(JsonNode game) {
