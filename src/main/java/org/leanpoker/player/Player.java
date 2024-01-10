@@ -4,8 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class Player {
 
@@ -62,19 +61,38 @@ public class Player {
             // color pair
             PAIR_COLOR = true;
         }
-        //if (gameState.round() == 0) {
-        if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
-            return call(gameState);
-        } else {
+
+        if (gameState.current_buy_in() == 1000 && gameState.round() == 0) {
             return fold();
         }
+//        if (gameState.round() == 0) {
+            return firstRound(gameState);
+//        } else if (gameState.round() == 1){
+//            var communityCards = gameState.community_cards();
+//            return checkMyCards(cards, communityCards);
+//        } else {
+//            return firstRound(gameState);
+//        }
         //} else {
         //  return fold();
         //}
     }
 
+//    private static int checkMyCards(Card[] myCards, Card[] communityCards) {
+//        var allCards = Arrays.asList(myCards, communityCards).stream().toList();
+//        var twoOfAKind = countTwoOfAKind(List.of(myCards, communityCards), 2);
+//    }
+
     private static int fold() {
         return 0;
+    }
+    
+    private static int firstRound(Request gameState) {
+        if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
+            return call(gameState);
+        } else {
+            return fold();
+        }
     }
 
     private static int call(Request request) {
@@ -135,27 +153,33 @@ public class Player {
 //        }
 //    }
 
-    int countTwoOfAKind(List<Card> cards) {
+    static int countTwoOfAKind(List<Card> cards, int count) {
         var rankFrequency = new HashMap<String, Integer>();
         for (var card : cards) {
             rankFrequency.put(card.rank(), rankFrequency.getOrDefault(card.rank(), 0) + 1);
         }
         int pairsCount = 0;
         for (var rank : rankFrequency.keySet()) {
-            if (rankFrequency.get(rank) == 2) {
+            if (rankFrequency.get(rank) == count) {
                 pairsCount++;
             }
         }
         return pairsCount;
     }
 
-//    int countThreeOfAKind(List) {
+    static int countStraight(List<Card> cards) {
+//        cards.sort((card1, card2) -> card1.rank().compareTo(card2.rank()));
 //
-//    }
+//        // Iterate through the sorted list and check if each card is one rank higher than the previous card
+//        for (int i = 1; i < cards.size(); i++) {
+//            if (cards.get(i).rank().compareTo(cards.get(i - 1).rank()) != 1) {
+//                return false;
+//            }
+//        }
 //
-//    int findStacks() {
-//
-//    }
+//        return true;
+        return 0;
+    }
 
     public static void showdown(JsonNode game) {
     }
