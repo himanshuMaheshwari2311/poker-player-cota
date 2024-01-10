@@ -12,7 +12,7 @@ import io.micronaut.http.annotation.Post;
 import java.util.Map;
 
 @Controller()
-public class PlayerController {
+public class    PlayerController {
 
     ObjectMapper mapper = new ObjectMapper();
 

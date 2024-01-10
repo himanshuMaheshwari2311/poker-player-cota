@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class Player {
@@ -38,9 +38,15 @@ public class Player {
 
     static public final int ROYAL_FLUSH = 1000;
 
-    public static int betRequest(JsonNode request) throws JsonProcessingException {
-        var gameState = mapper.treeToValue(request, Request.class);
-//        var cards = Arrays.stream(gameState.players()).filter(player -> player.name().equals("Cota")).findFirst().get().hole_cards();
+    public static int betRequest(JsonNode request) {
+        Request gameState;
+        try {
+            gameState = mapper.treeToValue(request, Request.class);
+        } catch (JsonProcessingException e) {
+            System.out.println("******************************");
+            System.out.println("Error parsing request: " + e.getMessage());
+            return fold();
+        }
         var cards = gameState.players()[gameState.in_action()].hole_cards();
 
 
@@ -56,19 +62,15 @@ public class Player {
             // color pair
             PAIR_COLOR = true;
         }
-        if (gameState.round() == 0) {
-            if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
-                if (gameState.current_buy_in() < 50) {
-                    return call(gameState);
-                } else {
-                    return fold();
-                }
-            } else {
-                return fold();
-            }
+        //if (gameState.round() == 0) {
+        if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
+            return call(gameState);
         } else {
             return fold();
         }
+        //} else {
+        //  return fold();
+        //}
     }
 
     private static int fold() {
@@ -115,7 +117,10 @@ public class Player {
 //    }
 
 //    private frequencies(Card[] cards) {
-    
+//      HashMap<int, int> frequency = new HashMap<int, int>();
+//      for (int i=0; i< cards.length; i++) {
+//            frequency
+//      }
 //}
 //
 //    private boolean sameRank(Card[] card, Card[] communityCard) {
@@ -128,6 +133,28 @@ public class Player {
 //        } else {
 //
 //        }
+//    }
+
+    int countTwoOfAKind(List<Card> cards) {
+        var rankFrequency = new HashMap<String, Integer>();
+        for (var card : cards) {
+            rankFrequency.put(card.rank(), rankFrequency.getOrDefault(card.rank(), 0) + 1);
+        }
+        int pairsCount = 0;
+        for (var rank : rankFrequency.keySet()) {
+            if (rankFrequency.get(rank) == 2) {
+                pairsCount++;
+            }
+        }
+        return pairsCount;
+    }
+
+//    int countThreeOfAKind(List) {
+//
+//    }
+//
+//    int findStacks() {
+//
 //    }
 
     public static void showdown(JsonNode game) {
