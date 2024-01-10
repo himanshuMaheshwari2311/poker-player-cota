@@ -25,7 +25,7 @@ public class Player {
 
     static public final int DOUBLE_PAIR = 100;
 
-    static public final int THREE_OF_A_KIND = 200;
+    static public final int THREE_OF_A_KIND = 500;
 
     static public final int STRAIGHT = 300;
 
@@ -48,11 +48,7 @@ public class Player {
         try {
             gameState = mapper.treeToValue(request, Request.class);
         } catch (JsonProcessingException e) {
-            System.out.println("******************************");
-            System.out.println("Error parsing request: " + e.getMessage());
             return fold();
-        }
-        if (startGambling) {
         }
         if (gameState.current_buy_in() == 1000 && gameState.community_cards().length == 0) {
             return fold();
@@ -79,9 +75,8 @@ public class Player {
         var fourOfAkind = countNOfAKind(allCards, 4);
         var haveHighCard = HIGHEST_CARDS.contains(request.players()[request.in_action()].hole_cards()[0].rank())
                 || HIGHEST_CARDS.contains(request.players()[request.in_action()].hole_cards()[1].rank());
-        if (isStraightFlush(allCards)) {
-            return raise(request, STRAIGHT_FLUSH);
-        } else if (isStraight(allCards)) {
+
+        if (isStraight(allCards)) {
             return raise(request, STRAIGHT);
         } else if (fourOfAkind == 1) {
             return request.players()[request.in_action()].stack();
@@ -135,7 +130,6 @@ public class Player {
 
     private static int call(Request request) {
         var call = Math.min(request.players()[request.in_action()].stack(), currentBet(request));
-        System.out.println("************Call for " + call + "**************");
         return call;
     }
 
@@ -143,7 +137,6 @@ public class Player {
         var player = request.players()[request.in_action()];
         var bet = player.bet();
         var currentBet = request.current_buy_in() - bet;
-        System.out.println("************CurrentBet for " + currentBet + "**************");
         return currentBet;
     }
 
@@ -299,16 +292,5 @@ public class Player {
             }
         }
         return maxConsecutive;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(
-                getMaxConsecutive(Arrays.asList(
-                        new Card("A", "hearts"),
-                        new Card("2", "hearts"),
-                        new Card("3", "hearts"),
-                        new Card("4", "hearts"),
-                        new Card("5", "hearts")
-                )));
     }
 }
