@@ -90,9 +90,11 @@ public class Player {
             }
         } else if (threeOfAkind == 1 && threeOfKindInCommunity == 0) {
             return raise(request, THREE_OF_A_KIND);
-        } else if (isFlush(allCards)) {
-            return raise(request, FLUSH);
-        } else if (twoOfKindInCommunity == 2) {
+        }
+//        else if (isFlush(allCards)) {
+//            return raise(request, FLUSH);
+//        }
+        else if (twoOfKindInCommunity == 2) {
             if (haveHighCard && currentBet(request) < 10 + blueCounterRaise)
                 return call(request);
             else
