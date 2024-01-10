@@ -14,6 +14,8 @@ public class Player {
     static final List<String> HIGHEST_CARDS = List.of("A", "K", "Q");
     static final List<String> HIGH_CARDS = List.of("A", "K", "Q", "J", "10");
 
+    // CONSECUTIVE ROUNDS
+
     static public final int HIGH = 50;
 
     static public final int PAIR = 75;
@@ -36,6 +38,8 @@ public class Player {
 
     static boolean startGambling = false;
 
+    static boolean blueCounter = true;
+
     public static int betRequest(JsonNode request) {
         Request gameState;
         try {
@@ -45,14 +49,14 @@ public class Player {
             System.out.println("Error parsing request: " + e.getMessage());
             return fold();
         }
-        if(startGambling) {
+        if (startGambling) {
         }
         if (gameState.current_buy_in() == 1000 && gameState.community_cards().length == 0) {
             return fold();
         }
         if (gameState.community_cards().length == 0) {
             return firstRound(gameState);
-        } else if(gameState.community_cards().length == 3)  {
+        } else if (gameState.community_cards().length == 3) {
             return checkMyCards(gameState);
         } else if (gameState.community_cards().length == 4) {
             return checkMyCards(gameState);
@@ -62,6 +66,7 @@ public class Player {
     }
 
     private static int checkMyCards(Request request) {
+        var blueCounterRaise = blueCounter ? 20 : 0;
         var allCards = getAllCards(request.players()[request.in_action()].hole_cards(), request.community_cards());
         var communityCards = Arrays.asList(request.community_cards());
         var twoOfAKind = countNOfAKind(allCards, 2);
@@ -88,26 +93,25 @@ public class Player {
         } else if (isFlush(allCards)) {
             return raise(request, FLUSH);
         } else if (twoOfKindInCommunity == 2) {
-            if (haveHighCard && currentBet(request) < 10)
+            if (haveHighCard && currentBet(request) < 10 + blueCounterRaise)
                 return call(request);
             else
                 return fold();
-        } else if (twoOfAKind == 2 && currentBet(request) < 10 ) {
+        } else if (twoOfAKind == 2 && currentBet(request) < 10 + blueCounterRaise) {
             return raise(request, DOUBLE_PAIR);
-        }  else if (twoOfAKind == 1 && currentBet(request) < 20) {
+        } else if (twoOfAKind == 1 && currentBet(request) < 20 + blueCounterRaise) {
             return call(request);
         }
         //here
         else if (getMaxConsecutive(allCards) == 4 && request.community_cards().length < 5) {
             if (currentBet(request) < 30)
                 return call(request);
-        }
-        else if (maxSameSuitCards(allCards) == 4 && request.community_cards().length < 5) {
+        } else if (maxSameSuitCards(allCards) == 4 && request.community_cards().length < 5) {
             if (currentBet(request) < 20)
                 return call(request);
         }
         //here
-        else if (haveHighCard && currentBet(request) < 10) {
+        else if (haveHighCard && currentBet(request) < 10 + blueCounterRaise) {
             return call(request);
         }
         return fold();
@@ -159,6 +163,8 @@ public class Player {
             return raise(gameState, 100);
         }
         if (PAIR_RANK) {
+            if (currentBet(gameState) < 100)
+                return call(gameState);
             return raise(gameState, 20);
         }
         if (TWO_HIGH) {
