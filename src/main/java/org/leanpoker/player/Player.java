@@ -11,6 +11,7 @@ public class Player {
     static final ObjectMapper mapper = new ObjectMapper();
 
     static final String VERSION = "Default Java folding player";
+    static final List<String> HIGHEST_CARDS = List.of("A", "K", "Q");
     static final List<String> HIGH_CARDS = List.of("A", "K", "Q", "J", "10");
 
     static public final int HIGH = 50;
@@ -33,6 +34,8 @@ public class Player {
 
     static public final int ROYAL_FLUSH = 1000;
 
+    static boolean startGambling = false;
+
     public static int betRequest(JsonNode request) {
         Request gameState;
         try {
@@ -41,6 +44,8 @@ public class Player {
             System.out.println("******************************");
             System.out.println("Error parsing request: " + e.getMessage());
             return fold();
+        }
+        if(startGambling) {
         }
         if (gameState.current_buy_in() == 1000 && gameState.community_cards().length == 0) {
             return fold();
@@ -76,10 +81,16 @@ public class Player {
             }
         } else if (threeOfAkind == 1 && threeOfKindInCommunity == 0) {
             return raise(request, THREE_OF_A_KIND);
-        } else if (twoOfAKind == 2) {
-            return raise(request, DOUBLE_PAIR);
         } else if (isFlush(allCards)) {
             return raise(request, FLUSH);
+        } else if (twoOfAKind == 2) {
+            return raise(request, DOUBLE_PAIR);
+        }  else if (twoOfAKind == 1 && currentBet(request) < 20) {
+            return call(request);
+        } else if ((HIGHEST_CARDS.contains(request.players()[request.in_action()].hole_cards()[0].rank())
+                || HIGHEST_CARDS.contains(request.players()[request.in_action()].hole_cards()[1].rank()))
+                && currentBet(request) < 10) {
+            return call(request);
         }
         return fold();
     }
@@ -223,14 +234,23 @@ public class Player {
                 compare(card1.rank(), card2.rank()));
 
         var straightSet = new HashSet<Card>();
+        int maxConsecutive = 1;
         for (int i = 1; i < cards.size(); i++) {
             if (compare(cards.get(i).rank(), cards.get(i - 1).rank()) == 1) {
                 straightSet.add(cards.get(i - 1));
                 straightSet.add(cards.get(i));
+                maxConsecutive = Math.max(maxConsecutive, straightSet.size());
             } else {
+                maxConsecutive = Math.max(maxConsecutive, straightSet.size());
                 straightSet.clear();
             }
         }
+//        if(straightSet.size() == 4
+//                && cards.get(cards.size() - 1).rank().equals("A")
+//                && cards.get(0).rank().equals("2")
+//        ) {
+//            straightSet.add(cards.get(cards.size() - 1));
+//        }
 
         return straightSet;
     }
@@ -239,10 +259,10 @@ public class Player {
         System.out.println(
                 isStraight(Arrays.asList(
                         new Card("A", "hearts"),
-                        new Card("K", "hearts"),
-                        new Card("Q", "hearts"),
-                        new Card("J", "hearts"),
-                        new Card("9", "hearts")
+                        new Card("2", "hearts"),
+                        new Card("3", "hearts"),
+                        new Card("4", "hearts"),
+                        new Card("5", "hearts")
                 )));
     }
 }
