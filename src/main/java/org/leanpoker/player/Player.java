@@ -77,9 +77,6 @@ public class Player {
             return raise(request, STRAIGHT);
         } else if (fourOfAkind == 1) {
             return request.players()[request.in_action()].stack();
-//        } else {
-//            return firstRound(request);
-//        }
         } else if (threeOfAkind == 1 && twoOfAKind == 1) {
             return raise(request, FULL_HOUSE);
         } else if (threeOfKindInCommunity == 1) {
@@ -99,7 +96,18 @@ public class Player {
             return raise(request, DOUBLE_PAIR);
         }  else if (twoOfAKind == 1 && currentBet(request) < 20) {
             return call(request);
-        } else if (haveHighCard && currentBet(request) < 10) {
+        }
+        //here
+        else if (getMaxConsecutive(allCards) == 4 && request.community_cards().length < 5) {
+            if (currentBet(request) < 30)
+                return call(request);
+        }
+        else if (maxSameSuitCards(allCards) == 4 && request.community_cards().length < 5) {
+            if (currentBet(request) < 20)
+                return call(request);
+        }
+        //here
+        else if (haveHighCard && currentBet(request) < 10) {
             return call(request);
         }
         return fold();
@@ -254,6 +262,14 @@ public class Player {
         }
 
         return straightSet;
+    }
+
+    private static int maxSameSuitCards(List<Card> cards) {
+        var suitCount = new HashMap<String, Integer>();
+        for (var card : cards) {
+            suitCount.put(card.suit(), suitCount.getOrDefault(card.suit(), 0) + 1);
+        }
+        return suitCount.values().stream().mapToInt(count -> count).max().orElse(0);
     }
 
     private static int getMaxConsecutive(List<Card> cards) {
