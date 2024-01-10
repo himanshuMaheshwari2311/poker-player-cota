@@ -108,10 +108,10 @@ public class Player {
             return call(request);
         }
         //here
-        else if (getMaxConsecutive(allCards) == 4 && request.community_cards().length < 5) {
-            if (currentBet(request) < 30)
-                return call(request);
-        }
+//        else if (getMaxConsecutive(allCards) == 4 && request.community_cards().length < 5) {
+//            if (currentBet(request) < 30)
+//                return call(request);
+//        }
 //        } else if (maxSameSuitCards(allCards) == 4 && request.community_cards().length < 5) {
 //            if (currentBet(request) < 20)
 //                return call(request);
@@ -255,7 +255,7 @@ public class Player {
         }
         var suit = set.stream().findAny().get().suit();
         var isSameColor = set.stream().allMatch(card -> card.suit().equals(suit));
-//        isFlush = true
+//        flush = is
         return isSameColor && set.size() == 5;
     }
 
