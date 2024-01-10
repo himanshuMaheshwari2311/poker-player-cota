@@ -42,20 +42,20 @@ public class Player {
             System.out.println("Error parsing request: " + e.getMessage());
             return fold();
         }
-        var cards = gameState.players()[gameState.in_action()].hole_cards();
-        if (gameState.current_buy_in() == 1000 && gameState.round() == 0) {
+        if (gameState.current_buy_in() == 1000 && gameState.community_cards().length == 0) {
             return fold();
         }
-        if (gameState.round() == 0) {
+        if (gameState.community_cards().length == 0) {
             return firstRound(gameState);
-        } else if (gameState.round() == 1) {
+        } else  {
             return checkMyCards(gameState);
-        } else {
-            return firstRound(gameState);
-//        }
+        }
+//        else {
+//            return firstRound(gameState);
+////        }
 //        } else {
 //          return fold();
-        }
+//        }
     }
 
     private static int checkMyCards(Request request) {
@@ -65,7 +65,9 @@ public class Player {
         var threeOfKindInCommunity = countNOfAKind(communityCards, 3);
         var threeOfAkind = countNOfAKind(allCards, 3);
         var fourOfAkind = countNOfAKind(allCards, 4);
-        if(isStraight(allCards)) {
+        if (isStraightFlush(allCards)) {
+            return raise(request, STRAIGHT_FLUSH);
+        } else if (isStraight(allCards)) {
             return raise(request, STRAIGHT);
         } else if (fourOfAkind == 1) {
             return request.players()[request.in_action()].stack();
@@ -102,11 +104,13 @@ public class Player {
         return call;
     }
 
-private static int currentBet(Request request) {
-    var player = request.players()[request.in_action()];
-    var bet = player.bet();
-    return request.current_buy_in() - bet;
-}
+    private static int currentBet(Request request) {
+        var player = request.players()[request.in_action()];
+        var bet = player.bet();
+        var currentBet = request.current_buy_in() - bet;
+        System.out.println("************CurrentBet for " + currentBet + "**************");
+        return currentBet;
+    }
 
     private static int firstRound(Request gameState) {
         boolean TWO_HIGH = false;
@@ -138,19 +142,19 @@ private static int currentBet(Request request) {
             } else {
                 return call(gameState);
             }
-        } else if (ONE_HIGH){
+        } else if (ONE_HIGH) {
             if (currentBet(gameState) > 50) {
                 return fold();
             } else {
                 return call(gameState);
             }
-        } else if (PAIR_COLOR){
+        } else if (PAIR_COLOR) {
             if (currentBet(gameState) > 10) {
                 return fold();
             } else {
                 return call(gameState);
             }
-        } else if (currentBet(gameState) < 5){
+        } else if (currentBet(gameState) < 5) {
             return call(gameState);
         } else {
             return fold();
@@ -180,6 +184,7 @@ private static int currentBet(Request request) {
 
     public static void showdown(JsonNode game) {
     }
+
     public static int compare(String rank1, String rank2) {
         return rankToInt(rank1) - rankToInt(rank2);
     }
@@ -205,7 +210,7 @@ private static int currentBet(Request request) {
 
     private static boolean isStraightFlush(List<Card> cards) {
         var set = checkSequence(cards);
-        if(set.size() == 0) {
+        if (set.size() == 0) {
             return false;
         }
         var suit = set.stream().findAny().get().suit();
@@ -218,18 +223,16 @@ private static int currentBet(Request request) {
         cards.sort((card1, card2) ->
                 compare(card1.rank(), card2.rank()));
 
-        int consecutives = 1;
         var straightSet = new HashSet<Card>();
-        for(int i = 1; i < cards.size(); i++) {
+        for (int i = 1; i < cards.size(); i++) {
             if (compare(cards.get(i).rank(), cards.get(i - 1).rank()) == 1) {
                 straightSet.add(cards.get(i - 1));
                 straightSet.add(cards.get(i));
-                consecutives++;
             } else {
                 straightSet.clear();
-                consecutives = 0;
             }
         }
+
         return straightSet;
     }
 
