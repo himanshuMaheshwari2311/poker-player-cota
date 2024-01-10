@@ -108,10 +108,11 @@ public class Player {
         else if (getMaxConsecutive(allCards) == 4 && request.community_cards().length < 5) {
             if (currentBet(request) < 30)
                 return call(request);
-        } else if (maxSameSuitCards(allCards) == 4 && request.community_cards().length < 5) {
-            if (currentBet(request) < 20)
-                return call(request);
         }
+//        } else if (maxSameSuitCards(allCards) == 4 && request.community_cards().length < 5) {
+//            if (currentBet(request) < 20)
+//                return call(request);
+//        }
         //here
         else if (haveHighCard && currentBet(request) < 10 + blueCounterRaise) {
             return call(request);
