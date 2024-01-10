@@ -56,10 +56,9 @@ public class Player {
             // color pair
             PAIR_COLOR = true;
         }
-        if(gameState.round() == 0) {
-
+        if (gameState.round() == 0) {
             if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
-                if (gameState.current_buy_in() < 100) {
+                if (gameState.current_buy_in() < 50) {
                     return call(gameState);
                 } else {
                     return fold();
@@ -79,6 +78,8 @@ public class Player {
     private static int call(Request request) {
         var player = request.players()[request.in_action()];
         var bet = player.bet();
+        var call = request.current_buy_in() - bet;
+        System.out.println("************Call for " + call + "**************");
         return request.current_buy_in() - bet;
     }
 
@@ -109,7 +110,13 @@ public class Player {
 //        return 0;
 //    }
 //
-//    private threeOfAKind
+//    private threeOfAKind(Card[] cards) {
+//      HashMap<int, int>  = new HashMap<int, int>();
+//    }
+
+//    private frequencies(Card[] cards) {
+    
+//}
 //
 //    private boolean sameRank(Card[] card, Card[] communityCard) {
 //        if (card[0].rank().equals(card[1].rank())) {

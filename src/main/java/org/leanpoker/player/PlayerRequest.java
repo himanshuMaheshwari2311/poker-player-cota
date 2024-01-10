@@ -1,13 +1,13 @@
 package org.leanpoker.player;
 
 public record PlayerRequest(
+        int id,
         String name,
-        int stack,
         String status,
-        int bet,
-        Card[] hole_cards,
         String version,
-        int id
+        int stack,
+        int bet,
+        Card[] hole_cards
 ) {
 }
 
