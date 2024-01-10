@@ -65,7 +65,9 @@ public class Player {
         var threeOfKindInCommunity = countNOfAKind(communityCards, 3);
         var threeOfAkind = countNOfAKind(allCards, 3);
         var fourOfAkind = countNOfAKind(allCards, 4);
-        if (fourOfAkind == 1) {
+        if(isStraight(allCards)) {
+            return raise(request, STRAIGHT);
+        } else if (fourOfAkind == 1) {
             return request.players()[request.in_action()].stack();
 //        } else {
 //            return firstRound(request);
@@ -124,62 +126,36 @@ private static int currentBet(Request request) {
             // color pair
             PAIR_COLOR = true;
         }
-        if (TWO_HIGH || ONE_HIGH || PAIR_RANK || PAIR_COLOR) {
+        if (TWO_HIGH && PAIR_RANK) {
+            return call(gameState);
+        }
+        if (PAIR_RANK) {
+            return call(gameState);
+        }
+        if (TWO_HIGH) {
+            if (currentBet(gameState) > 100) {
+                return fold();
+            } else {
+                return call(gameState);
+            }
+        } else if (ONE_HIGH){
+            if (currentBet(gameState) > 50) {
+                return fold();
+            } else {
+                return call(gameState);
+            }
+        } else if (PAIR_COLOR){
+            if (currentBet(gameState) > 10) {
+                return fold();
+            } else {
+                return call(gameState);
+            }
+        } else if (currentBet(gameState) < 5){
             return call(gameState);
         } else {
             return fold();
         }
     }
-
-//    private static int minimumRaise(Request request) {
-//        var cards = request.players()[request.in_action()].hole_cards();
-//        var communityCards = request.community_cards();
-//        var currentBuyIn = request.current_buy_in();
-//        var allCards = Arrays.asList(cards, communityCards);
-//        if (singlePair(allCards)) {
-//            return Math.max(0, (PAIR - currentBuyIn));
-//        }
-//        if (doublePair(allCards)) {
-//            return Math.max(0, (DOUBLE_PAIR - currentBuyIn));
-//        }
-//        if (threeOfAKind(allCards)) {
-//            return Math.max(0, (THREE_OF_A_KIND - currentBuyIn));
-//        }
-//        if (singlePair(allCards)) {
-//            return Math.max(0, (FULL_HOUSE - currentBuyIn));
-//        }
-////        if (singlePair()) {
-////            return Math.max(0, (HIGH - currentBuyIn));
-////        }
-////        if (singlePair()) {
-////            return Math.max(0, (HIGH - currentBuyIn));
-////        }
-//
-//        return 0;
-//    }
-//
-//    private threeOfAKind(Card[] cards) {
-//      HashMap<int, int>  = new HashMap<int, int>();
-//    }
-
-//    private frequencies(Card[] cards) {
-//      HashMap<int, int> frequency = new HashMap<int, int>();
-//      for (int i=0; i< cards.length; i++) {
-//            frequency
-//      }
-//}
-//
-//    private boolean sameRank(Card[] card, Card[] communityCard) {
-//        if (card[0].rank().equals(card[1].rank())) {
-//            // pair
-//            PAIR_RANK = true;
-//        } else if (List.of(card[0], card[1]).contains(communityCard[0].rank())) {
-//            // color pair
-//            PAIR_COLOR = true;
-//        } else {
-//
-//        }
-//    }
 
     static int countNOfAKind(List<Card> cards, int count) {
         var rankFrequency = new HashMap<String, Integer>();
@@ -224,18 +200,37 @@ private static int currentBet(Request request) {
     }
 
     private static boolean isStraight(List<Card> cards) {
+        return checkSequence(cards).size() == 5;
+    }
+
+    private static boolean isStraightFlush(List<Card> cards) {
+        var set = checkSequence(cards);
+        if(set.size() == 0) {
+            return false;
+        }
+        var suit = set.stream().findAny().get().suit();
+        var isSameColor = set.stream().allMatch(card -> card.suit().equals(suit));
+
+        return isSameColor && set.size() == 5;
+    }
+
+    private static HashSet<Card> checkSequence(List<Card> cards) {
         cards.sort((card1, card2) ->
-            compare(card1.rank(), card2.rank()));
+                compare(card1.rank(), card2.rank()));
 
         int consecutives = 1;
+        var straightSet = new HashSet<Card>();
         for(int i = 1; i < cards.size(); i++) {
             if (compare(cards.get(i).rank(), cards.get(i - 1).rank()) == 1) {
+                straightSet.add(cards.get(i - 1));
+                straightSet.add(cards.get(i));
                 consecutives++;
             } else {
+                straightSet.clear();
                 consecutives = 0;
             }
         }
-        return consecutives == 5;
+        return straightSet;
     }
 
     public static void main(String[] args) {
@@ -245,7 +240,7 @@ private static int currentBet(Request request) {
                         new Card("K", "hearts"),
                         new Card("Q", "hearts"),
                         new Card("J", "hearts"),
-                        new Card("10", "hearts")
+                        new Card("9", "hearts")
                 )));
     }
 }
