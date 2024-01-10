@@ -48,8 +48,7 @@ public class Player {
         }
         if (gameState.round() == 0) {
             return firstRound(gameState);
-        } else if (gameState.round() == 1){
-            var communityCards = gameState.community_cards();
+        } else if (gameState.round() == 1) {
             return checkMyCards(gameState);
         } else {
             return firstRound(gameState);
@@ -64,18 +63,38 @@ public class Player {
         var twoOfAKind = countNOfAKind(allCards, 2);
         var threeOfAkind = countNOfAKind(allCards, 3);
         var fourOfAkind = countNOfAKind(allCards, 4);
-        if (fourOfAkind ==1) {
+        if (fourOfAkind == 1) {
             return request.players()[request.in_action()].stack();
         } else {
             return firstRound(request);
         }
-//        } else if (threeOfAkind)
+//        } else if (threeOfAkind == 1) {
+//            return Math.max()
+//        } else if (twoOfAKind == 2) {
+//
+//        } else if (twoOfAKind == 1) {
+//
+//        }
     }
+
+//    private static int raise(Request request, int raiseBy) {
+//        var raise = 0;
+//        request.current_buy_in()
+//        return raise;
+//    }
 
     private static int fold() {
         return 0;
     }
-    
+
+    private static int call(Request request) {
+        var player = request.players()[request.in_action()];
+        var bet = player.bet();
+        var call = Math.max(request.players()[request.in_action()].stack(), request.current_buy_in() - bet);
+        System.out.println("************Call for " + call + "**************");
+        return call;
+    }
+
     private static int firstRound(Request gameState) {
         boolean TWO_HIGH = false;
         boolean ONE_HIGH = false;
@@ -99,14 +118,6 @@ public class Player {
         } else {
             return fold();
         }
-    }
-
-    private static int call(Request request) {
-        var player = request.players()[request.in_action()];
-        var bet = player.bet();
-        var call = Math.max(request.players()[request.in_action()].stack(), request.current_buy_in() - bet);
-        System.out.println("************Call for " + call + "**************");
-        return request.current_buy_in() - bet;
     }
 
 //    private static int minimumRaise(Request request) {
@@ -173,8 +184,8 @@ public class Player {
         return pairsCount;
     }
 
-    static int countStraight(List<Card> cards) {
-//        cards.sort((card1, card2) -> card1.rank().compareTo(card2.rank()));
+//    static int countStraight(List<Card> cards) {
+//        cards.sort(CardRankComparator::compare);
 //
 //        // Iterate through the sorted list and check if each card is one rank higher than the previous card
 //        for (int i = 1; i < cards.size(); i++) {
@@ -184,8 +195,8 @@ public class Player {
 //        }
 //
 //        return true;
-        return 0;
-    }
+//        return 0;
+//    }
 
     private static List<Card> getAllCards(Card[] myCards, Card[] communityCards) {
         List<Card> allCards = new ArrayList<>();
@@ -195,6 +206,27 @@ public class Player {
     }
 
     public static void showdown(JsonNode game) {
+    }
+
+
+    static class CardRankComparator implements Comparator<String> {
+        @Override
+        public int compare(String rank1, String rank2) {
+            return rankToInt(rank1) - rankToInt(rank2);
+        }
+
+        private int rankToInt(String rank) {
+            switch (rank) {
+                case "J":
+                    return 11;
+                case "Q":
+                    return 12;
+                case "K":
+                    return 13;
+                default:
+                    return Integer.parseInt(rank);
+            }
+        }
     }
 }
 
