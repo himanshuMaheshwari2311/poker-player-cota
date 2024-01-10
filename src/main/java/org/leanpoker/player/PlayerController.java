@@ -26,7 +26,6 @@ public class    PlayerController {
     public String doPost(@Body Map<String, String> body) throws JsonProcessingException {
         String action = body.get("action");
         String gameState = body.get("game_state");
-        System.out.println(gameState);
         if ("bet_request".equals(action)) {
             return String.valueOf(Player.betRequest(mapper.readTree(gameState)));
         }
