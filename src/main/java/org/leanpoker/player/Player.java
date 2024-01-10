@@ -50,12 +50,6 @@ public class Player {
         } else  {
             return checkMyCards(gameState);
         }
-//        else {
-//            return firstRound(gameState);
-////        }
-//        } else {
-//          return fold();
-//        }
     }
 
     private static int checkMyCards(Request request) {
@@ -84,6 +78,8 @@ public class Player {
             return raise(request, THREE_OF_A_KIND);
         } else if (twoOfAKind == 2) {
             return raise(request, DOUBLE_PAIR);
+        } else if (isFlush(allCards)) {
+            return raise(request, FLUSH);
         }
         return fold();
     }
@@ -131,10 +127,10 @@ public class Player {
             PAIR_COLOR = true;
         }
         if (TWO_HIGH && PAIR_RANK) {
-            return call(gameState);
+            return raise(gameState, 100);
         }
         if (PAIR_RANK) {
-            return call(gameState);
+            return raise(gameState, 20);
         }
         if (TWO_HIGH) {
             if (currentBet(gameState) > 100) {
@@ -190,18 +186,21 @@ public class Player {
     }
 
     private static int rankToInt(String rank) {
-        switch (rank) {
-            case "J":
-                return 11;
-            case "Q":
-                return 12;
-            case "K":
-                return 13;
-            case "A":
-                return 14;
-            default:
-                return Integer.parseInt(rank);
+        return switch (rank) {
+            case "J" -> 11;
+            case "Q" -> 12;
+            case "K" -> 13;
+            case "A" -> 14;
+            default -> Integer.parseInt(rank);
+        };
+    }
+
+    private static boolean isFlush(List<Card> cards) {
+        var suitCount = new HashMap<String, Integer>();
+        for (var card : cards) {
+            suitCount.put(card.suit(), suitCount.getOrDefault(card.suit(), 0) + 1);
         }
+        return suitCount.values().stream().anyMatch(count -> count >= 5);
     }
 
     private static boolean isStraight(List<Card> cards) {
